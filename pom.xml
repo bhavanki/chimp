@@ -79,5 +79,8 @@
       </plugin>
     </plugins>
   </build>
-
+  <scm>
+    <connection>scm:svn:http://chimp.googlecode.com/svn</connection>
+    <developerConnection>scm:svn:https://chimp.googlecode.com/svn</developerConnection>
+  </scm>
 </project>
