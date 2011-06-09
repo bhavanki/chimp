@@ -1,0 +1,24 @@
+CHIMP Release Notes
+-------------------
+
+Version 1.1 - 2005 April 7
+-----------
+
+Reworked the underpinnings to not use the DOM as the data model (yuck!).
+
+Ditched the old CHIMP icons. They are still included, but not used. I need
+something better.
+
+The decryption password dialog now reappears if you enter the wrong password,
+so you can try again without having to browse for the file.
+
+Version 1.01 - 2003 June 27
+------------
+
+Just a minor bug fix ... it had something to do with something being blank
+causing problems, but I forget now exactly what it was. Oh well.
+
+Version 1.0
+-----------
+
+Initial version. Fresh.
