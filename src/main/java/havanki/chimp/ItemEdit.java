@@ -52,7 +52,8 @@ public class ItemEdit extends JDialog implements ActionListener
 
     if (command.equals (APPLY) || command.equals (OK))
       {
-	if (titleField.getText().equals (""))
+	  String newTitle = titleField.getText();
+	  if (newTitle.equals (""))
 	  {
 	    JOptionPane.showMessageDialog (this, "You must provide a title.",
 					   "No Title",
@@ -61,15 +62,15 @@ public class ItemEdit extends JDialog implements ActionListener
 	  }
 
 	// Check for duplicate title. ADD = always, MODIFY = only if changed.
+	  boolean titleChanged = !(newTitle.equals (selectedTitle));
 	boolean doReplace = false;
-	if (adding ||
-	    (!adding && !(titleField.getText().equals (selectedTitle))))
+	if (adding || (!adding && titleChanged))
 	  {
 	    String[] currentTitles = tbl.getTitles();
 	    doReplace = false;
 	    for (int i = 0; i < currentTitles.length; i++)
 	      {
-		if (currentTitles[i].equals (titleField.getText()))
+		if (currentTitles[i].equals (newTitle))
 		  {
 		    int rc = JOptionPane.showConfirmDialog
 		      (this,
@@ -82,11 +83,16 @@ public class ItemEdit extends JDialog implements ActionListener
 	      }
 	  }
 
-	// Remove the old item with the same title if necessary.
+	// Remove an old item if necessary.
 	// ADD = if doReplace true, remove new title.
-	// MODIFY = if doReplace true, remove new title.
-	if (doReplace)
-	  tbl.remove (titleField.getText());
+	// MODIFY = if doReplace true, remove new title; if title changed,
+	// remove old title.
+	if (doReplace) {
+	    tbl.remove (newTitle);
+	}
+	if (!adding && titleChanged) {
+	    tbl.remove (selectedTitle);
+	}
 
 	// Modify the item!
 	item.setTitle (titleField.getText());
@@ -98,8 +104,8 @@ public class ItemEdit extends JDialog implements ActionListener
 	  item.setPassword (clearPasswordField.getText().toCharArray());
 	item.setComments (commentsField.getText());
 
-	// Add new item if necessary. ADD = always, MODIFY = never.
-	if (adding) tbl.put (item);
+	// Add new item if necessary. ADD = always, MODIFY = if title changed.
+	if (adding || (!adding && titleChanged)) tbl.put (item);
 
 	// Update selectedTitle. Now it's as if the dialog was just opened.
 	selectedTitle = item.getTitle();
