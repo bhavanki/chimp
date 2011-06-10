@@ -104,6 +104,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
 	currFile = null;
 	tbl = new SecureItemTable();
+	getRootPane().putClientProperty ("Window.documentModified", Boolean.TRUE);
 
 	fillList();
       }
@@ -111,12 +112,22 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     if (command.equals (OPEN))
       {
 	this.repaint();
+	/*
 	JFileChooser chooser =
 	  new JFileChooser (System.getProperty ("user.dir"));
 	int rc = chooser.showOpenDialog (this);
 	if (rc != JFileChooser.APPROVE_OPTION) return;
 
 	currFile = chooser.getSelectedFile();
+	*/
+	FileDialog fdialog =
+	    new FileDialog (this, "Open a password file", FileDialog.LOAD);
+	fdialog.show();
+	String chosenFile = fdialog.getFile();
+	if (chosenFile == null) { return; }
+	currFile = new File (fdialog.getDirectory() +
+			     System.getProperty ("file.separator") +
+			     chosenFile);
 	PassFileReader pfr = new PassFileReader (currFile);
 
 	do {
@@ -141,6 +152,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 	    }
 	} while (tbl == null);
 
+	getRootPane().putClientProperty ("Window.documentModified", Boolean.FALSE);
 	fillList();
       }
 
@@ -148,12 +160,23 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
       {
 	if (command.equals (SAVE_AS) || currFile == null)
 	  {
+	      /*
 	    JFileChooser chooser =
 	      new JFileChooser (System.getProperty ("user.dir"));
 	    int rc = chooser.showSaveDialog (this);
 	    if (rc != JFileChooser.APPROVE_OPTION) return;
 
 	    currFile = chooser.getSelectedFile();
+	      */
+	      FileDialog fdialog =
+		  new FileDialog (this, "Save a password file",
+				  FileDialog.SAVE);
+	      fdialog.show();
+	      String chosenFile = fdialog.getFile();
+	      if (chosenFile == null) { return; }
+	      currFile = new File (fdialog.getDirectory() +
+				   System.getProperty ("file.separator") +
+				   chosenFile);
 	  }
 	PassFileWriter pfw = new PassFileWriter (currFile);
 
@@ -165,6 +188,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
 	try {
 	  pfw.write (tbl, password);
+	  getRootPane().putClientProperty ("Window.documentModified", Boolean.FALSE);
 	} catch (IOException exc) {
 	  System.err.println ("Error writing: " + exc);
 	}
@@ -194,6 +218,9 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 	ItemEdit editDialog = new ItemEdit (this, item, tbl,
 					    (command.equals(ADD)),
 					    hidePasswords);
+	if (editDialog.isItemModified()) {
+	    getRootPane().putClientProperty ("Window.documentModified", Boolean.TRUE);
+	}
 	fillList();
       }
 
@@ -209,6 +236,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 	if (rc == JOptionPane.NO_OPTION) return;  // = abort
 
 	tbl.remove (selectedTitle);
+	getRootPane().putClientProperty ("Window.documentModified", Boolean.TRUE);
 	
 	fillList();
       }
@@ -266,6 +294,11 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     JPanel mainPanel = new JPanel();
     mainPanel.setLayout (new BorderLayout());
 
+    // OS DETECTION
+    String osString = System.getProperty ("os.name");
+    boolean imAMac = (osString.toLowerCase (java.util.Locale.US)
+		      .indexOf ("mac") != -1);
+
     // MENU
     JMenuBar menuBar = new JMenuBar();
     setJMenuBar (menuBar);
@@ -276,26 +309,33 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     menuBar.add (menu);
 
     JMenuItem menuItem = new JMenuItem (NEW, KeyEvent.VK_N);
+    setAccelerator (menuItem, KeyEvent.VK_N, imAMac);
     menuItem.addActionListener (this);
     menuItem.setActionCommand (NEW);
     menu.add (menuItem);
     menuItem = new JMenuItem (OPEN, KeyEvent.VK_O);
+    setAccelerator (menuItem, KeyEvent.VK_O, imAMac);
     menuItem.addActionListener (this);
     menuItem.setActionCommand (OPEN);
     menu.add (menuItem);
     menuItem = new JMenuItem (SAVE, KeyEvent.VK_S);
+    setAccelerator (menuItem, KeyEvent.VK_S, imAMac);
     menuItem.addActionListener (this);
     menuItem.setActionCommand (SAVE);
     menu.add (menuItem);
     menuItem = new JMenuItem (SAVE_AS, KeyEvent.VK_A);
+    //    setAccelerator (menuItem, KeyEvent.VK_A, imAMac);
     menuItem.addActionListener (this);
     menuItem.setActionCommand (SAVE_AS);
     menu.add (menuItem);
-    menu.addSeparator();
-    menuItem = new JMenuItem (EXIT, KeyEvent.VK_X);
-    menuItem.addActionListener (this);
-    menuItem.setActionCommand (EXIT);
-    menu.add (menuItem);
+    if (!imAMac) {
+	menu.addSeparator();
+	menuItem = new JMenuItem (EXIT, KeyEvent.VK_X);
+	setAccelerator (menuItem, KeyEvent.VK_X, imAMac);
+	menuItem.addActionListener (this);
+	menuItem.setActionCommand (EXIT);
+	menu.add (menuItem);
+    }
 
     // MENU - Edit
     menu = new JMenu ("Edit");
@@ -303,23 +343,28 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     menuBar.add (menu);
 
     menuItem = new JMenuItem (ADD, KeyEvent.VK_A);
+    setAccelerator (menuItem, KeyEvent.VK_A, imAMac);
     menuItem.addActionListener (this);
     menuItem.setActionCommand (ADD);
     menu.add (menuItem);
     menuItem = new JMenuItem (MODIFY, KeyEvent.VK_M);
+    setAccelerator (menuItem, KeyEvent.VK_M, imAMac);
     menuItem.addActionListener (this);
     menuItem.setActionCommand (MODIFY);
     menu.add (menuItem);
     menuItem = new JMenuItem (REMOVE, KeyEvent.VK_R);
+    setAccelerator (menuItem, KeyEvent.VK_R, imAMac);
     menuItem.addActionListener (this);
     menuItem.setActionCommand (REMOVE);
     menu.add (menuItem);
     menu.addSeparator();
     menuItem = new JMenuItem (COPY, KeyEvent.VK_C);
+    setAccelerator (menuItem, KeyEvent.VK_C, imAMac);
     menuItem.addActionListener (this);
     menuItem.setActionCommand (COPY);
     menu.add (menuItem);
     menuItem = new JMenuItem (CLEAR, KeyEvent.VK_L);
+    setAccelerator (menuItem, KeyEvent.VK_L, imAMac);
     menuItem.addActionListener (this);
     menuItem.setActionCommand (CLEAR);
     menu.add (menuItem);
@@ -331,6 +376,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
     hpmodeItem = new JCheckBoxMenuItem (HP_MODE, hidePasswords);
     hpmodeItem.setMnemonic (KeyEvent.VK_H);
+    setAccelerator (hpmodeItem, KeyEvent.VK_H, imAMac);
     hpmodeItem.addActionListener (this);
     hpmodeItem.setActionCommand (HP_MODE);
     menu.add (hpmodeItem);
@@ -441,6 +487,16 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     ImageIcon i = loadImageIconAsResource (filename);
     if (i != null) super.setIconImage (i.getImage());
   }
+
+    private void setAccelerator (JMenuItem jmi, int key, boolean imAMac) {
+	if (imAMac) {
+	    jmi.setAccelerator (KeyStroke.getKeyStroke (key,
+							Event.META_MASK));
+	} else {
+	    jmi.setAccelerator (KeyStroke.getKeyStroke (key,
+							Event.CTRL_MASK));
+	}
+    }
 
   public static void main (String args[])
   {
