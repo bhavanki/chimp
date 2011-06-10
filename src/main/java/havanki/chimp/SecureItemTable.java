@@ -27,11 +27,11 @@ import javax.xml.parsers.*;
 
 public class SecureItemTable
 {
-    private Map table;
+    private Map<String,SecureItem> table;
 
     public SecureItemTable()
     {
-	table = new java.util.HashMap();
+	table = new java.util.HashMap<String,SecureItem>();
     }
 
     public void put (SecureItem si)
@@ -40,7 +40,7 @@ public class SecureItemTable
     }
     public SecureItem get (String title)
     {
-	return (SecureItem) table.get (title);
+	return table.get (title);
     }
     public void remove (String title)
     {
@@ -53,7 +53,7 @@ public class SecureItemTable
 
     public String[] getTitles()
     {
-	Set keySet = table.keySet();
+	Set<String> keySet = table.keySet();
 	return (String []) keySet.toArray (new String [keySet.size()]);
     }
 
