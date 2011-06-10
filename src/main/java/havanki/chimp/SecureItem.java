@@ -31,14 +31,12 @@ public class SecureItem
     private char[] copy (char[] a)
     {
 	char[] b = new char [a.length];
-	for (int i = 0; i < a.length; i++) {
-	    b[i] = a[i];
-	}
+	System.arraycopy (a, 0, b, 0, a.length);
 	return b;
     }
     private void clear (char[] a)
     {
-	for (int i = 0; i < a.length; i++) a[i] = (char) 0;
+	java.util.Arrays.fill (a, (char) 0);
     }
 
     public SecureItem() { title = "New Item"; }
