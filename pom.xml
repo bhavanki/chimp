@@ -65,7 +65,7 @@
 	      <directory>samples</directory>
 	    </fileSet>
 	  </additionalResources>
-	  <vmOptions>-Dapple.laf.useScreenMenuBar=true</vmOptions>
+	  <vmOptions>-Dapple.laf.useScreenMenuBar=true -Dapple.awt.brushMetalLook=true -Dapple.awt.textantialiasing=true</vmOptions>
 	</configuration>
 	<executions>
 	  <execution>
