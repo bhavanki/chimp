@@ -1,6 +1,6 @@
 /*
- * CHIMP 1.1 - Cyber Helper Internet Monkey Program
- * Copyright (C) 2001-2005 Bill Havanki
+ * CHIMP 1.1.1 - Cyber Helper Internet Monkey Program
+ * Copyright (C) 2001-2012 Bill Havanki
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -69,7 +69,7 @@ public class ItemEdit extends JDialog implements ActionListener
 	boolean doReplace = false;
 	if (adding || (!adding && titleChanged))
 	  {
-	    String[] currentTitles = tbl.getTitles();
+	    String[] currentTitles = tbl.getTitlesInOrder();
 	    doReplace = false;
 	    for (int i = 0; i < currentTitles.length; i++)
 	      {

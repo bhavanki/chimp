@@ -1,6 +1,6 @@
 /*
- * CHIMP 1.1 - Cyber Helper Internet Monkey Program
- * Copyright (C) 2001-2005 Bill Havanki
+ * CHIMP 1.1.1 - Cyber Helper Internet Monkey Program
+ * Copyright (C) 2001-2012 Bill Havanki
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -58,9 +58,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
       }
     else
       {
-	String[] titles = tbl.getTitles();
-	java.util.Arrays.sort (titles);
-	//	for (int i = 0; i < titles.length; i++) System.out.println (titles[i]);
+	String[] titles = tbl.getTitlesInOrder();
 	itemList.setListData (titles);
       }
     itemList.invalidate();
@@ -435,9 +433,21 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     // FRAME CONTENTS
     mainPanel.add (toolbar, BorderLayout.NORTH);
 
-    itemList = new JList();
+    itemList = new JList() {
+	    public String getToolTipText (MouseEvent e) {
+		Point p = e.getPoint();
+		int idx = locationToIndex (p);
+		String username = (tbl.getUsernamesInOrder()) [idx];
+		if (username != null && !(username.trim().equals (""))) {
+		    return "Username: " + username;
+		} else {
+		    return "Username unknown";
+		}
+	    }
+	};
     itemList.setVisibleRowCount (10);
     itemList.addMouseListener (this);
+    ToolTipManager.sharedInstance().registerComponent (itemList);
     JScrollPane scrollPane = new JScrollPane (itemList);
     scrollPane.setBorder (BorderFactory.createCompoundBorder
 			  (BorderFactory.createEmptyBorder (0,5,5,5),

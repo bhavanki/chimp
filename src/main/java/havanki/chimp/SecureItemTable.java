@@ -1,6 +1,6 @@
 /*
- * CHIMP 1.1 - Cyber Helper Internet Monkey Program
- * Copyright (C) 2001-2005 Bill Havanki
+ * CHIMP 1.1.1 - Cyber Helper Internet Monkey Program
+ * Copyright (C) 2001-2012 Bill Havanki
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,6 +18,7 @@
  */
 package havanki.chimp;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,10 +52,21 @@ public class SecureItemTable
 	return table.size();
     }
 
-    public String[] getTitles()
+    public String[] getTitlesInOrder()
     {
 	Set<String> keySet = table.keySet();
-	return (String []) keySet.toArray (new String [keySet.size()]);
+	String[] titles = (String [])
+	    keySet.toArray (new String [keySet.size()]);
+	Arrays.sort (titles);
+	return titles;
+    }
+    public String[] getUsernamesInOrder() {
+	String[] usernames = new String [table.size()];
+	String[] titles = getTitlesInOrder();
+	for (int i = 0; i < titles.length; i++) {
+	    usernames[i] = table.get (titles[i]).getUsername(); 
+	}
+	return usernames;
     }
 
     public void fillWithDocument (Document doc) throws ChimpException
@@ -89,7 +101,7 @@ public class SecureItemTable
 				      exc);
 	}
 
-	String[] titles = getTitles();
+	String[] titles = getTitlesInOrder();
 	for (int i = 0; i < titles.length; i++) {
 	    SecureItem item = get (titles[i]);
 	    Element el_item = item.getElement (doc);
