@@ -235,7 +235,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
 	tbl.remove (selectedTitle);
 	getRootPane().putClientProperty ("Window.documentModified", Boolean.TRUE);
-	
+
 	fillList();
       }
 
@@ -281,13 +281,13 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     super ("CHIMP!");
 
     setDefaultCloseOperation (JFrame.DO_NOTHING_ON_CLOSE);
-    addWindowListener (new WindowAdapter() { 
+    addWindowListener (new WindowAdapter() {
 	public void windowClosing (WindowEvent e)
-	{ 
-	  System.exit (0); 
-	} 
+	{
+	  System.exit (0);
+	}
       }
-		       ); 
+		       );
     Container cp = getContentPane();
     JPanel mainPanel = new JPanel();
     mainPanel.setLayout (new BorderLayout());
@@ -408,7 +408,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     toolbar.add (tbButton);
 
     toolbar.addSeparator();
-    
+
     tbButton = new JButton (loadImageIconAsResource ("Add16.gif"));
     tbButton.addActionListener (this);
     tbButton.setActionCommand (ADD);
@@ -429,7 +429,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     tbButton.setActionCommand (CLEAR);
     tbButton.setToolTipText ("Clear Clipboard");
     toolbar.add (tbButton);
-    
+
     // FRAME CONTENTS
     mainPanel.add (toolbar, BorderLayout.NORTH);
 
@@ -437,7 +437,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 	    public String getToolTipText (MouseEvent e) {
 		Point p = e.getPoint();
 		int idx = locationToIndex (p);
-		String username = (tbl.getUsernamesInOrder()) [idx];
+		String username = (tbl.getUsernamesInTitleOrder()) [idx];
 		if (username != null && !(username.trim().equals (""))) {
 		    return "Username: " + username;
 		} else {
@@ -526,7 +526,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     int x = (screenSize.width - chimp.getWidth()) / 2;
     int y = (screenSize.height - chimp.getHeight()) / 2;
     chimp.setLocation (x, y);
-    
+
     chimp.setVisible (true);
   }
 }

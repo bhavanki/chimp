@@ -18,148 +18,165 @@
  */
 package havanki.chimp;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import org.w3c.dom.*;
 
-public class SecureItem
-{
+public class SecureItem {
     private String title;
     private String resource;
     private String username;
     private char[] password;
     private String comments;
+    private Date modificationDate;
 
-    private char[] copy (char[] a)
-    {
-	char[] b = new char [a.length];
-	System.arraycopy (a, 0, b, 0, a.length);
-	return b;
-    }
-    private void clear (char[] a)
-    {
-	java.util.Arrays.fill (a, (char) 0);
+    private static void clear (char[] a) {
+        java.util.Arrays.fill (a, (char) 0);
     }
 
     public SecureItem() { title = "New Item"; }
 
     public String getTitle() { return title; }
-    public void setTitle (String t)
-    {
-	if (t == null) throw new IllegalArgumentException ("null title");
-	title = t;
+    public SecureItem setTitle (String t) {
+        if (t == null) { throw new IllegalArgumentException ("null title"); }
+        title = t;
+        return this;
     }
 
     public String getResource() { return resource; }
-    public void setResource (String r) { resource = ( r != null ? r : "" ); }
-
-    public String getUsername() { return username; }
-    public void setUsername (String u) { username = ( u != null ? u : "" ); }
-
-    public char[] getPassword()
-    {
-	if (password == null) return null;
-	char[] p = copy (password);
-	return p;
+    public SecureItem setResource (String r) {
+        resource = ( r != null ? r : "" );
+        return this;
     }
-    public void setPassword (char[] p)
-    {
-	if (password != null) clear (password);
-	if (p == null)
-	    password = new char[0];
-	else
-	    password = copy (p);
+    public String getUsername() { return username; }
+    public SecureItem setUsername (String u) {
+        username = ( u != null ? u : "" );
+        return this;
+    }
+
+    public char[] getPassword() {
+        if (password == null) { return null; }
+        return Arrays.copyOf (password, password.length);
+    }
+    public SecureItem setPassword (char[] p) {
+        if (password != null) { clear (password); }
+        if (p == null) {
+            password = new char[0];
+        } else {
+            password = Arrays.copyOf (p, p.length);
+        }
+        return this;
     }
 
     public String getComments() { return comments; }
-    public void setComments (String c) { comments = ( c != null ? c : "" ); }
-
-    private String getText (Element el) throws ChimpException
-    {
-	el.normalize();
-	NodeList nl = el.getChildNodes();
-	if (nl.getLength() == 0) return "";
-	if (nl.getLength() != 1) {
-	    throw new ChimpException ("No single text node for " +
-				      el.getTagName());
-	}
-	Node n = nl.item (0);
-	if (!(n.getNodeType() == Node.TEXT_NODE)) {
-	    throw new ChimpException ("No text node for " + el.getTagName());
-	}
-	return n.getNodeValue();
+    public SecureItem setComments (String c) {
+        comments = ( c != null ? c : "" );
+        return this;
     }
 
-    public void fillWithElement (Element el) throws ChimpException
-    {
-	setTitle (el.getAttribute ("title"));
-
-	NodeList nl;
-	Element el_sub;
-
-	nl = el.getElementsByTagName ("resource");
-	if (nl.getLength() != 1) {
-	    throw new ChimpException ("No unique resource for " + getTitle());
-	}
-	el_sub = (Element) nl.item (0);
-	setResource (getText (el_sub));
-
-	nl = el.getElementsByTagName ("username");
-	if (nl.getLength() != 1) {
-	    throw new ChimpException ("No unique username for " + getTitle());
-	}
-	el_sub = (Element) nl.item (0);
-	setUsername (getText (el_sub));
-
-	nl = el.getElementsByTagName ("password");
-	if (nl.getLength() != 1) {
-	    throw new ChimpException ("No unique password for " + getTitle());
-	}
-	el_sub = (Element) nl.item (0);
-	setPassword (getText (el_sub).toCharArray());
-
-	nl = el.getElementsByTagName ("comments");
-	if (nl.getLength() != 1) {
-	    throw new ChimpException ("No unique comments for " + getTitle());
-	}
-	el_sub = (Element) nl.item (0);
-	setComments (getText (el_sub));
+    public Date getModificationDate() {
+        return new Date(modificationDate.getTime());
     }
-    public Element getElement (Document doc) throws ChimpException
-    {
-	try {
-	    Element el = doc.createElement ("secure-item");
-	    el.setAttribute ("title", title);
-
-	    Text tx;
-
-	    Element el_r = doc.createElement ("resource");
-	    tx = doc.createTextNode (resource);
-	    el_r.appendChild (tx);
-	    el.appendChild (el_r);
-
-	    Element el_u = doc.createElement ("username");
-	    tx = doc.createTextNode (username);
-	    el_u.appendChild (tx);
-	    el.appendChild (el_u);
-
-	    Element el_p = doc.createElement ("password");
-	    tx = doc.createTextNode (new String (password));  // sigh
-	    el_p.appendChild (tx);
-	    el.appendChild (el_p);
-
-	    Element el_c = doc.createElement ("comments");
-	    tx = doc.createTextNode (comments);
-	    el_c.appendChild (tx);
-	    el.appendChild (el_c);
-
-	    return el;
-	} catch (DOMException exc) {
-	    throw new ChimpException ("Unable to create element for " + title,
-				      exc);
-	}
+    public SecureItem setModificationDate(Date md) {
+        if (md == null) {
+            throw new IllegalArgumentException("null modification date");
+        }
+        modificationDate = new Date(md.getTime());
+        return this;
     }
 
-    public void dispose()
-    {
-	if (password != null) clear (password);
+    public void fillWithElement (Element el) throws ChimpException {
+        setTitle (el.getAttribute ("title"));
+
+        NodeList nl;
+        Element el_sub;
+
+        nl = el.getElementsByTagName ("resource");
+        if (nl.getLength() != 1) {
+            throw new ChimpException ("No unique resource for " + getTitle());
+        }
+        el_sub = (Element) nl.item (0);
+        setResource (el_sub.getTextContent());
+
+        nl = el.getElementsByTagName ("username");
+        if (nl.getLength() != 1) {
+            throw new ChimpException ("No unique username for " + getTitle());
+        }
+        el_sub = (Element) nl.item (0);
+        setUsername (el_sub.getTextContent());
+
+        nl = el.getElementsByTagName ("password");
+        if (nl.getLength() != 1) {
+            throw new ChimpException ("No unique password for " + getTitle());
+        }
+        el_sub = (Element) nl.item (0);
+        setPassword (el_sub.getTextContent().toCharArray());
+
+        nl = el.getElementsByTagName ("comments");
+        if (nl.getLength() != 1) {
+            throw new ChimpException ("No unique comments for " + getTitle());
+        }
+        el_sub = (Element) nl.item (0);
+        setComments (el_sub.getTextContent());
+
+        nl = el.getElementsByTagName ("modificationDate");
+        if (nl.getLength() > 1) {
+            throw new ChimpException ("No unique modification date for " +
+                                      getTitle());
+        }
+        if (nl.getLength() == 0) {
+            setModificationDate(new Date(0L));  // for compatibility
+        } else {
+            el_sub = (Element) nl.item(0);
+            Date d;
+            try {
+                d = getDateFormat().parse(el_sub.getTextContent());
+            } catch (ParseException exc) {
+                throw new ChimpException ("Unparseable modification time for " +
+                                          getTitle());
+            }
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(d);
+            cal.set(Calendar.MILLISECOND, 0);
+            setModificationDate(cal.getTime());
+        }
+    }
+
+    static DateFormat getDateFormat() {
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    }
+
+    public Element getElement (Document doc) throws ChimpException {
+        try {
+            Element el = doc.createElement ("secure-item");
+            el.setAttribute ("title", title);
+
+            attachSubElement(el, "resource", resource, doc);
+            attachSubElement(el, "username", username, doc);
+            attachSubElement(el, "password", new String(password), doc); // sigh
+            attachSubElement(el, "comments", comments, doc);
+            attachSubElement(el, "modificationDate",
+                             getDateFormat().format(modificationDate), doc);
+
+            return el;
+        } catch (DOMException exc) {
+            throw new ChimpException ("Unable to create element for " + title,
+                                      exc);
+        }
+    }
+    private static void attachSubElement(Element el, String name, String value,
+                                         Document doc) {
+        Element el_sub = doc.createElement(name);
+        Text tx = doc.createTextNode(value);
+        el_sub.appendChild (tx);
+        el.appendChild (el_sub);
+    }
+
+    public void dispose() {
+        if (password != null) clear (password);
     }
 }
