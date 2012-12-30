@@ -1,0 +1,9 @@
+<secure-item-table>
+    <secure-item title="Ponybook">
+        <resource>http://www.book.pony/</resource>
+        <username>Applejack</username>
+        <password>password</password>
+        <comments>Yeehaw</comments>
+        <modificationDate>2012-12-30T12:34:56-0500</modificationDate>
+    </secure-item>
+</secure-item-table>

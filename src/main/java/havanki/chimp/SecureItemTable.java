@@ -99,4 +99,13 @@ public class SecureItemTable
 
         return doc;
     }
+
+    @Override public boolean equals(Object other) {
+        if (this == other) { return true; }
+        if (!(other instanceof SecureItemTable)) { return false; }
+        return table.equals(((SecureItemTable) other).table);
+    }
+    @Override public int hashCode() {
+        return table.hashCode();
+    }
 }

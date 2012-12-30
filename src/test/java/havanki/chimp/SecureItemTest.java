@@ -1,5 +1,6 @@
 package havanki.chimp;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import org.w3c.dom.Document;
@@ -9,12 +10,9 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class SecureItemTest {
-    private static final Date NOW;
+    private static final SecDate NOW;
     static {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.set(Calendar.MILLISECOND, 0);
-        NOW = cal.getTime();
+        NOW = new SecDate(System.currentTimeMillis());
     }
     private static final String NOW_STRING =
         SecureItem.getDateFormat().format(NOW);
@@ -90,4 +88,43 @@ public class SecureItemTest {
         item2.fillWithElement(el);
         checkProperties(item2);
     }
+
+    @Test public void testEquals() {
+        item.setTitle("Ponybook")
+            .setResource("http://www.book.pony/")
+            .setUsername("Applejack")
+            .setPassword("password".toCharArray())
+            .setComments("Yeehaw")
+            .setModificationDate(NOW);
+        assertTrue(item.equals(item));
+        assertFalse(item.equals(null));
+        SecureItem item2 = new SecureItem()
+            .setTitle("Ponybook")
+            .setResource("http://www.book.pony/")
+            .setUsername("Applejack")
+            .setPassword("password".toCharArray())
+            .setComments("Yeehaw")
+            .setModificationDate(new Date(NOW.getTime()));
+        assertTrue(item.equals(item2));
+        assertTrue(item2.equals(item));
+
+        item2.setTitle("Ponynook");
+        assertFalse(item.equals(item2));
+        item2.setTitle(item.getTitle()).setResource("http://www.book.derp");
+        assertFalse(item.equals(item2));
+        item2.setResource(item.getResource()).setUsername("Derpy");
+        assertFalse(item.equals(item2));
+        item2.setUsername(item.getUsername()).setPassword(new char[0]);
+        assertFalse(item.equals(item2));
+        item2.setPassword(Arrays.copyOf(item.getPassword(), item.getPassword().length))
+            .setComments("Muffins");
+        assertFalse(item.equals(item2));
+        item2.setComments(item.getComments())
+            .setModificationDate(new Date(NOW.getTime() + 1000L));
+        assertFalse(item.equals(item2));
+        item2.setModificationDate(new Date(NOW.getTime()));
+        assertTrue(item.equals(item2));
+    }
+
+    // TBD testHashCode
 }

@@ -32,13 +32,16 @@ public class SecureItem {
     private String username;
     private char[] password;
     private String comments;
-    private Date modificationDate;
+    private SecDate modificationDate;
 
     private static void clear (char[] a) {
         java.util.Arrays.fill (a, (char) 0);
     }
 
-    public SecureItem() { title = "New Item"; }
+    public SecureItem() {
+        title = "New Item";
+        modificationDate = new SecDate(System.currentTimeMillis());
+    }
 
     public String getTitle() { return title; }
     public SecureItem setTitle (String t) {
@@ -78,14 +81,14 @@ public class SecureItem {
         return this;
     }
 
-    public Date getModificationDate() {
-        return new Date(modificationDate.getTime());
+    public SecDate getModificationDate() {
+        return new SecDate(modificationDate.getTime());
     }
     public SecureItem setModificationDate(Date md) {
         if (md == null) {
             throw new IllegalArgumentException("null modification date");
         }
-        modificationDate = new Date(md.getTime());
+        modificationDate = new SecDate(md.getTime());
         return this;
     }
 
@@ -139,10 +142,7 @@ public class SecureItem {
                 throw new ChimpException ("Unparseable modification time for " +
                                           getTitle());
             }
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(d);
-            cal.set(Calendar.MILLISECOND, 0);
-            setModificationDate(cal.getTime());
+            setModificationDate(new SecDate(d));
         }
     }
 
@@ -157,7 +157,9 @@ public class SecureItem {
 
             attachSubElement(el, "resource", resource, doc);
             attachSubElement(el, "username", username, doc);
-            attachSubElement(el, "password", new String(password), doc); // sigh
+            if (password != null) {
+                attachSubElement(el, "password", new String(password), doc);
+            }
             attachSubElement(el, "comments", comments, doc);
             attachSubElement(el, "modificationDate",
                              getDateFormat().format(modificationDate), doc);
@@ -170,6 +172,7 @@ public class SecureItem {
     }
     private static void attachSubElement(Element el, String name, String value,
                                          Document doc) {
+        if (value == null) { return; }
         Element el_sub = doc.createElement(name);
         Text tx = doc.createTextNode(value);
         el_sub.appendChild (tx);
@@ -178,5 +181,28 @@ public class SecureItem {
 
     public void dispose() {
         if (password != null) clear (password);
+    }
+
+    @Override public boolean equals(Object other) {
+        if (this == other) { return true; }
+        if (!(other instanceof SecureItem)) { return false; }
+        SecureItem o = (SecureItem) other;
+        if (!(title.equals(o.title))) { return false; }
+        if (!(resource == null ? o.resource == null : resource.equals(o.resource))) { return false; }
+        if (!(username == null ? o.username == null : username.equals(o.username))) { return false; }
+        if (!(Arrays.equals(password, o.password))) { return false; }
+        if (!(comments == null ? o.comments == null : comments.equals(o.comments))) { return false; }
+        if (!(modificationDate.equals(o.modificationDate))) { return false; }
+        return true;
+    }
+    @Override public int hashCode() {
+        int c = 17;
+        c = 37*c + title.hashCode();
+        if (resource != null) { c = 37*c + resource.hashCode(); }
+        if (username != null) { c = 37*c + username.hashCode(); }
+        if (password != null) { c = 37*c + password.hashCode(); }
+        if (comments != null) { c = 37*c + comments.hashCode(); }
+        c = 37*c + modificationDate.hashCode();
+        return c;
     }
 }

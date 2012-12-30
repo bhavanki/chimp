@@ -96,4 +96,21 @@ public class SecureItemTableTest {
         assertArrayEquals(new String[] { "Instagrass", "Ponybook", "Trotter"},
                           titles);
     }
+
+    @Test public void testEquals() {
+        t.put(item1).put(item2);
+        assertTrue(t.equals(t));
+        assertFalse(t.equals(null));
+        SecureItemTable t2 = new SecureItemTable();
+        t2.put(item1).put(item2);
+        assertTrue(t.equals(t2));
+        assertTrue(t2.equals(t));
+        t2.put(item3);
+        assertFalse(t.equals(t2));
+        t2.remove(item3.getTitle()).remove(item1.getTitle());
+        assertFalse(t.equals(t2));
+        t2.put(item1);
+        assertTrue(t.equals(t2));
+    }
+    // TBD testHashCode
 }
