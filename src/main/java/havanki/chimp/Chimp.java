@@ -373,8 +373,8 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     menuBar.add (menu);
 
     hpmodeItem = new JCheckBoxMenuItem (HP_MODE, hidePasswords);
-    hpmodeItem.setMnemonic (KeyEvent.VK_H);
-    setAccelerator (hpmodeItem, KeyEvent.VK_H, imAMac);
+    hpmodeItem.setMnemonic (KeyEvent.VK_P);
+    setAccelerator (hpmodeItem, KeyEvent.VK_P, imAMac);
     hpmodeItem.addActionListener (this);
     hpmodeItem.setActionCommand (HP_MODE);
     menu.add (hpmodeItem);
@@ -445,7 +445,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 		}
 	    }
 	};
-    itemList.setVisibleRowCount (10);
+    itemList.setVisibleRowCount (25);
     itemList.addMouseListener (this);
     ToolTipManager.sharedInstance().registerComponent (itemList);
     JScrollPane scrollPane = new JScrollPane (itemList);
