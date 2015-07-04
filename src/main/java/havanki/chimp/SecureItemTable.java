@@ -1,6 +1,6 @@
 /*
  * CHIMP 1.1.1 - Cyber Helper Internet Monkey Program
- * Copyright (C) 2001-2012 Bill Havanki
+ * Copyright (C) 2001-2015 Bill Havanki
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,83 +29,99 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.*;
 import javax.xml.parsers.*;
 
+/**
+ * A table of {@link SecureItem} objects keyed by title.
+ */
 public class SecureItemTable
 {
-    private Map<String,SecureItem> table;
+  private Map<String,SecureItem> table;
 
-    public SecureItemTable() {
-        table = new java.util.HashMap<String,SecureItem>();
-    }
+  public SecureItemTable() {
+    table = new java.util.HashMap<>();
+  }
 
-    public SecureItemTable put (SecureItem si) {
-        table.put (si.getTitle(), si);
-        return this;
-    }
-    public SecureItem get (String title) {
-        return table.get (title);
-    }
-    public SecureItemTable remove (String title) {
-        table.remove (title);
-        return this;
-    }
-    public int size() {
-        return table.size();
-    }
+  public SecureItemTable put (SecureItem si) {
+    table.put(si.getTitle(), si);
+    return this;
+  }
+  public SecureItem get(String title) {
+    return table.get(title);
+  }
+  public SecureItemTable remove(String title) {
+    table.remove(title);
+    return this;
+  }
+  public int size() {
+    return table.size();
+  }
 
-    public String[] getTitlesInOrder() {
-        Set<String> keySet = table.keySet();
-        String[] titles = (String [])
-            keySet.toArray (new String [keySet.size()]);
-        Arrays.sort (titles);
-        return titles;
+  public void dispose() {
+    for (SecureItem item : table.values()) {
+      item.dispose();
     }
-    public String[] getUsernamesInTitleOrder() {
-        String[] usernames = new String [table.size()];
-        String[] titles = getTitlesInOrder();
-        for (int i = 0; i < titles.length; i++) {
-            usernames[i] = table.get (titles[i]).getUsername();
-        }
-        return usernames;
+  }
+
+  public String[] getTitlesInOrder() {
+    Set<String> keySet = table.keySet();
+    String[] titles = (String []) keySet.toArray(new String [keySet.size()]);
+    Arrays.sort(titles);
+    return titles;
+  }
+
+  public String[] getUsernamesInTitleOrder() {
+    String[] usernames = new String [table.size()];
+    String[] titles = getTitlesInOrder();
+    for (int i = 0; i < titles.length; i++) {
+      usernames[i] = table.get(titles[i]).getUsername();
     }
+    return usernames;
+  }
 
-    public void fillWithDocument (Document doc) throws ChimpException {
-        NodeList nl = doc.getElementsByTagName ("secure-item");
-        for (int i = 0; i < nl.getLength(); i++) {
-            Element el = (Element) nl.item (i);
-            SecureItem item = new SecureItem();
-            item.fillWithElement (el);
-            put (item);
-        }
-        return;
+  public void fillWithDocument(Document doc) throws ChimpException {
+    NodeList nl = doc.getElementsByTagName("secure-item");
+    for (int i = 0; i < nl.getLength(); i++) {
+      Element el = (Element) nl.item (i);
+      SecureItemBuilder b = new SecureItemBuilder(el);
+      put(b.build());
     }
-    public Document getDocument() throws ChimpException {
-        Document doc = XmlUtils.newDocument();
+    return;
+  }
 
-        Element root;
-        try {
-            root = doc.createElement ("secure-item-table");
-            doc.appendChild (root);
-        } catch (DOMException exc) {
-            throw new ChimpException ("Could not create table element",
-                          exc);
-        }
+  public Document getDocument() throws ChimpException {
+    Document doc = XmlUtils.newDocument();
 
-        String[] titles = getTitlesInOrder();
-        for (int i = 0; i < titles.length; i++) {
-            SecureItem item = get (titles[i]);
-            Element el_item = item.getElement (doc);
-            root.appendChild (el_item);
-        }
-
-        return doc;
+    Element root;
+    try {
+      root = doc.createElement("secure-item-table");
+      doc.appendChild(root);
+    } catch (DOMException exc) {
+        throw new ChimpException("Could not create table element", exc);
     }
 
-    @Override public boolean equals(Object other) {
-        if (this == other) { return true; }
-        if (!(other instanceof SecureItemTable)) { return false; }
-        return table.equals(((SecureItemTable) other).table);
+    String[] titles = getTitlesInOrder();
+    for (int i = 0; i < titles.length; i++) {
+      SecureItem item = get(titles[i]);
+      Element el_item = item.getElement(doc);
+      root.appendChild(el_item);
     }
-    @Override public int hashCode() {
-        return table.hashCode();
-    }
+
+    return doc;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) { return true; }
+    if (!(other instanceof SecureItemTable)) { return false; }
+    return table.equals(((SecureItemTable) other).table);
+  }
+
+  @Override
+  public int hashCode() {
+    return table.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return table.toString();
+  }
 }
