@@ -78,6 +78,9 @@ public class PassFileReader
     Document doc;
     try {
       doc = db.parse(source);
+    } catch (IOException exc) {
+      // Probably the wrong password...
+      return null;
     } catch (SAXException exc) {
       // Probably the wrong password...
       return null;
