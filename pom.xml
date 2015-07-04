@@ -51,51 +51,56 @@
           </archive>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>make-app</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <taskdef name="bundleapp"
+                         classname="com.oracle.appbundler.AppBundlerTask"
+                         classpath="${project.basedir}/lib/appbundler-1.0.jar" />
+                <bundleapp
+                  outputdirectory="${project.build.directory}"
+                  name="Chimp" displayName="Chimp"
+                  identifier="havanki.chimp.Chimp"
+                  shortversion="${project.version}"
+                  mainclassname="havanki.chimp.Chimp">
+                  <runtime dir="${env.JAVA_HOME}" />
+                  <classpath file="${project.build.directory}/${project.build.finalName}.jar" />
+                  <option value="-Dapple.laf.useScreenMenuBar=true" />
+                  <option value="-Dapple.awt.textantialiasing=true" />
+                </bundleapp>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.2-beta-5</version>
         <configuration>
           <descriptors>
-        <descriptor>assembly.xml</descriptor>
-      </descriptors>
-    </configuration>
-    <executions>
-      <execution>
-        <id>make-assembly</id>
-        <phase>package</phase>
-        <goals><goal>single</goal></goals>
-      </execution>
-    </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>osxappbundle-maven-plugin</artifactId>
-        <version>1.0-alpha-2</version>
-        <configuration>
-          <bundleName>Chimp</bundleName>
-          <mainClass>havanki.chimp.Chimp</mainClass>
-          <additionalResources>
-        <fileSet>
-          <directory>${basedir}</directory>
-          <includes>
-        <include>docs/*</include>
-        <include>docs/legal/*</include>
-          </includes>
-        </fileSet>
-        <fileSet>
-          <directory>samples</directory>
-        </fileSet>
-      </additionalResources>
-      <vmOptions>-Dapple.laf.useScreenMenuBar=true -Dapple.awt.brushMetalLook=true -Dapple.awt.textantialiasing=true</vmOptions>
-    </configuration>
-    <executions>
-      <execution>
-        <id>make-app</id>
-        <phase>package</phase>
-        <goals><goal>bundle</goal></goals>
-      </execution>
-    </executions>
+            <descriptor>assembly.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals><goal>single</goal></goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

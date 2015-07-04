@@ -14,6 +14,10 @@
       <directory>target</directory>
     </fileSet>
     <fileSet>
+      <outputDirectory>Chimp.app</outputDirectory>
+      <directory>target/Chimp.app</directory>
+    </fileSet>
+    <fileSet>
       <directory>docs</directory>
     </fileSet>
     <fileSet>
