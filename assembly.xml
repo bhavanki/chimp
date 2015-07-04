@@ -18,6 +18,13 @@
       <directory>target/Chimp.app</directory>
     </fileSet>
     <fileSet>
+      <outputDirectory />
+      <includes>
+        <include>README.md</include>
+        <include>LICENSE.md</include>
+      </includes>
+    </fileSet>
+    <fileSet>
       <directory>docs</directory>
     </fileSet>
     <fileSet>
@@ -26,10 +33,6 @@
         <include>*.ico</include>
       </includes>
       <directory>src/main/resources</directory>
-    </fileSet>
-    <fileSet>
-      <outputDirectory>bin</outputDirectory>
-      <directory>src/main/bin</directory>
     </fileSet>
     <fileSet>
       <directory>samples</directory>

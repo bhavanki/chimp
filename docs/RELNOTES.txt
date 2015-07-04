@@ -1,6 +1,11 @@
 CHIMP Release Notes
 -------------------
 
+Version 1.1.1 - unreleased
+-------------
+
+Added tooltip revealing username when hovering over item in list.
+
 Version 1.1 - 2005 April 7
 -----------
 
