@@ -34,13 +34,13 @@ import javax.xml.parsers.*;
  */
 public class SecureItemTable
 {
-  private Map<String,SecureItem> table;
+  private final Map<String,SecureItem> table;
 
   public SecureItemTable() {
     table = new java.util.HashMap<>();
   }
 
-  public SecureItemTable put (SecureItem si) {
+  public SecureItemTable put(SecureItem si) {
     table.put(si.getTitle(), si);
     return this;
   }
@@ -54,6 +54,10 @@ public class SecureItemTable
   public int size() {
     return table.size();
   }
+  public boolean contains(SecureItem item) {
+    return table.containsValue(item);
+  }
+
 
   public void dispose() {
     for (SecureItem item : table.values()) {

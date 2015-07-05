@@ -3,28 +3,55 @@ package havanki.chimp;
 import org.w3c.dom.Document;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class SecureItemTableTest {
-  private static SecureItem item1, item2, item3;
-  @BeforeClass
-  public static void setUpClass() {
-    item1 = new SecureItemBuilder("Ponybook").username("Applejack").build();
-    item2 = new SecureItemBuilder("Trotter").username("Rarity").build();
-    item3 = new SecureItemBuilder("Instagrass").username("Fluttershy").build();
+  static SecureItem item1, item2, item3;
+
+  static {
+    try {
+      item1 = new SecureItemBuilder("Ponybook")
+          .resource("http://www.book.pony/")
+          .username("Applejack")
+          .password("password".toCharArray())
+          .comments("Yeehaw")
+          .modificationDate(new SecDate("2013-01-02T12:34:56-0500"))
+          .username("Applejack")
+          .build();
+      item2 = new SecureItemBuilder("Trotter")
+          .resource("http://www.trotter.pony/")
+          .username("Rarity")
+          .password("rarepass".toCharArray())
+          .comments("My word")
+          .modificationDate(new SecDate("2013-01-03T12:34:56-0500"))
+          .build();
+      item3 = new SecureItemBuilder("Instagrass")
+          .resource("http://www.instagrass.pony/")
+          .username("Fluttershy")
+          .password("flutterpass".toCharArray())
+          .comments("yay")
+          .modificationDate(new SecDate("2013-01-01T12:34:56-0500"))
+          .build();
+    } catch (Exception e) {
+      throw new ExceptionInInitializerError(e);
+    }
   }
 
   private SecureItemTable t;
+
   @Before
   public void setUp() {
     t = new SecureItemTable();
   }
 
   @Test
-  public void testMap() {
+  public void testEmpty() {
     assertEquals(0, t.size());
+  }
+
+  @Test
+  public void testPutAndGet() {
     t.put(item1);
     assertEquals(1, t.size());
     assertEquals(item1, t.get("Ponybook"));
@@ -32,11 +59,25 @@ public class SecureItemTableTest {
     t.put(item2);
     assertEquals(2, t.size());
     assertEquals(item2, t.get("Trotter"));
+  }
+
+  @Test
+  public void testRemove() {
+    t.put(item1).put(item2);
     t.remove(item1.getTitle());
     assertEquals(1, t.size());
     assertNull(t.get("Ponybook"));
     assertEquals(item2, t.get("Trotter"));
   }
+
+  @Test
+  public void testContains() {
+    t.put(item1).put(item2);
+    assertTrue(t.contains(item1));
+    assertTrue(t.contains(item2));
+    assertFalse(t.contains(item3));
+  }
+
   @Test
   public void testGetTitlesInOrder() {
     t.put(item1).put(item2).put(item3);
