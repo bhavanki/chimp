@@ -48,6 +48,7 @@ public class SecureItemTableTest {
   @Test
   public void testEmpty() {
     assertEquals(0, t.size());
+    assertFalse(t.isDirty());
   }
 
   @Test
@@ -55,19 +56,29 @@ public class SecureItemTableTest {
     t.put(item1);
     assertEquals(1, t.size());
     assertEquals(item1, t.get("Ponybook"));
+    assertTrue(t.isDirty());
     assertNull(t.get("Trotter"));
+
     t.put(item2);
     assertEquals(2, t.size());
     assertEquals(item2, t.get("Trotter"));
+    assertTrue(t.isDirty());
+
+    t.setDirty(false);
+    t.get("Trotter");
+    assertFalse(t.isDirty());
   }
 
   @Test
   public void testRemove() {
     t.put(item1).put(item2);
+    t.setDirty(false);
+
     t.remove(item1.getTitle());
     assertEquals(1, t.size());
     assertNull(t.get("Ponybook"));
     assertEquals(item2, t.get("Trotter"));
+    assertTrue(t.isDirty());
   }
 
   @Test

@@ -35,13 +35,16 @@ import javax.xml.parsers.*;
 public class SecureItemTable
 {
   private final Map<String,SecureItem> table;
+  private boolean dirty;
 
   public SecureItemTable() {
     table = new java.util.HashMap<>();
+    dirty = false;
   }
 
   public SecureItemTable put(SecureItem si) {
     table.put(si.getTitle(), si);
+    dirty = true;
     return this;
   }
   public SecureItem get(String title) {
@@ -49,6 +52,7 @@ public class SecureItemTable
   }
   public SecureItemTable remove(String title) {
     table.remove(title);
+    dirty = true;
     return this;
   }
   public int size() {
@@ -58,6 +62,12 @@ public class SecureItemTable
     return table.containsValue(item);
   }
 
+  public boolean isDirty() {
+    return dirty;
+  }
+  public void setDirty(boolean dirty) {
+    this.dirty = dirty;
+  }
 
   public void dispose() {
     for (SecureItem item : table.values()) {

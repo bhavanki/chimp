@@ -66,6 +66,11 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     return;
   }
 
+  private void setDocumentModifiedFlag(SecureItemTable table) {
+    getRootPane().putClientProperty("Window.documentModified",
+                                    Boolean.valueOf(table.isDirty()));
+  }
+
   private static final String ABOUT_HTML =
       "<html>" +
       "<div class='text-align: center'>" +
@@ -105,7 +110,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
       currFile = null;
       tbl = new SecureItemTable();
-      getRootPane().putClientProperty("Window.documentModified", Boolean.TRUE);
+      setDocumentModifiedFlag(tbl);
 
       fillList();
     }
@@ -141,7 +146,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
         }
       } while (tbl == null);
 
-      getRootPane().putClientProperty("Window.documentModified", Boolean.FALSE);
+      setDocumentModifiedFlag(tbl);
       fillList();
     }
 
@@ -163,8 +168,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
       try {
         pfw.write(tbl, password);
-        getRootPane().putClientProperty("Window.documentModified",
-                                        Boolean.FALSE);
+        setDocumentModifiedFlag(tbl);
       } catch (IOException exc) {
         System.err.println("Error writing: " + exc);
       }
@@ -189,10 +193,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
       // Do the dialog.
       ItemEdit editDialog = new ItemEdit(this, item, tbl, command.equals(ADD),
                                          hidePasswords);
-      if (editDialog.isItemModified()) {
-        getRootPane().putClientProperty("Window.documentModified",
-                                        Boolean.TRUE);
-      }
+      setDocumentModifiedFlag(tbl);
       fillList();
     }
 
@@ -206,7 +207,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
       if (rc == JOptionPane.NO_OPTION) return;  // = abort
 
       tbl.remove(selectedTitle);
-      getRootPane().putClientProperty("Window.documentModified", Boolean.TRUE);
+      setDocumentModifiedFlag(tbl);
 
       fillList();
     }

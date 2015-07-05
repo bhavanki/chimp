@@ -97,6 +97,7 @@ public class PassFileWriter
       if (os != null) os.close();
     }
 
+    tbl.setDirty(false);
     return;
   }
 }

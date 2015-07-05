@@ -34,7 +34,6 @@ public class ItemEdit extends JDialog implements ActionListener
   String selectedTitle;
   private boolean adding;
   private boolean hidePassword;
-  private boolean itemModified;
 
   private JTextField titleField;
   private JTextField resourceField;
@@ -45,8 +44,6 @@ public class ItemEdit extends JDialog implements ActionListener
   private JButton okButton;
   private JButton cancelButton;
   private JButton applyButton;
-
-  public boolean isItemModified() { return itemModified; }
 
   public void actionPerformed(ActionEvent e) {
     String command = e.getActionCommand();
@@ -94,7 +91,6 @@ public class ItemEdit extends JDialog implements ActionListener
       // Add modified item, replacing previous item (if title is the same).
       SecureItem newItem = b.build();
       tbl.put(newItem);
-      itemModified = true;
 
       // Update selectedTitle. Now it's as if the dialog was just opened.
       selectedTitle = newItem.getTitle();
@@ -113,7 +109,6 @@ public class ItemEdit extends JDialog implements ActionListener
     this.adding = adding;
     this.hidePassword = hidePassword;
     if (!adding) selectedTitle = item.getTitle();
-    itemModified = false;
 
     Container cp = getContentPane();
     JPanel mainPanel = new JPanel();
