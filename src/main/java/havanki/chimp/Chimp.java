@@ -19,8 +19,11 @@
 package havanki.chimp;
 
 import com.apple.eawt.AboutHandler;
+import com.apple.eawt.QuitHandler;
+import com.apple.eawt.QuitResponse;
 import com.apple.eawt.Application;
 import com.apple.eawt.AppEvent.AboutEvent;
+import com.apple.eawt.AppEvent.QuitEvent;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -86,8 +89,11 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     this.repaint();
     String command = e.getActionCommand();
 
-    if (command.equals(EXIT))
-      System.exit(0);
+    if (command.equals(EXIT)) {
+      if (okToExit()) {
+        System.exit(0);
+      }
+    }
 
     if (command.equals(ABOUT)) {
       JOptionPane.showMessageDialog(this, ABOUT_HTML,
@@ -116,6 +122,14 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     }
 
     if (command.equals(OPEN)) {
+      if (tbl != null && tbl.isDirty()) {
+        int rc = JOptionPane.showConfirmDialog(this,
+            "There are unsaved changes. Are you sure you want to open a new file?",
+            "Confirm", JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE);
+        if (rc == JOptionPane.NO_OPTION) return;  // abort
+      }
+
       this.repaint();
 
       FileDialog fdialog =
@@ -232,6 +246,17 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     }
   }
 
+  private boolean okToExit() {
+    if (tbl != null && tbl.isDirty()) {
+      int rc = JOptionPane.showConfirmDialog(this,
+          "There are unsaved changes. Are you sure you want to quit?",
+          "Confirm", JOptionPane.YES_NO_OPTION,
+          JOptionPane.WARNING_MESSAGE);
+      return rc == JOptionPane.YES_OPTION;
+    }
+    return true;
+  }
+
   public void mouseClicked(MouseEvent e)
   {
     // This is just looking for double clicks in the item list.
@@ -319,7 +344,20 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     menuItem.addActionListener(this);
     menuItem.setActionCommand(SAVE_AS);
     menu.add(menuItem);
-    if (!imAMac) {
+    if (imAMac) {
+      Application macApplication = Application.getApplication();
+      macApplication.setQuitHandler(new QuitHandler() {
+        @Override
+        public void handleQuitRequestWith(QuitEvent quitEvent,
+                                          QuitResponse quitResponse) {
+          if (okToExit()) {
+            quitResponse.performQuit();
+          } else {
+            quitResponse.cancelQuit();
+          }
+        }
+      });
+    } else {
       menu.addSeparator();
       menuItem = new JMenuItem(EXIT, KeyEvent.VK_X);
       setAccelerator(menuItem, KeyEvent.VK_X, imAMac);
