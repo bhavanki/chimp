@@ -52,6 +52,9 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
   private static final String ABOUT = "About";
 
+  RecentFileList recentFiles = RecentFileList.loadFromPreferences();
+  JMenuItem openMenuItem;
+  JMenu recentMenu;
   File currFile = null;
   SecureItemTable tbl = null;
   JList itemList;
@@ -132,13 +135,19 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
       this.repaint();
 
-      FileDialog fdialog =
-          new FileDialog(this, "Open a password file", FileDialog.LOAD);
-      fdialog.show();
-      String chosenFile = fdialog.getFile();
-      if (chosenFile == null) { return; }
-      currFile = new File(fdialog.getDirectory() +
-                          System.getProperty("file.separator") + chosenFile);
+      if (e.getSource().equals(openMenuItem)) {
+        FileDialog fdialog =
+            new FileDialog(this, "Open a password file", FileDialog.LOAD);
+        fdialog.show();
+        String chosenFile = fdialog.getFile();
+        if (chosenFile == null) { return; }
+        currFile = new File(fdialog.getDirectory() +
+                            System.getProperty("file.separator") + chosenFile);
+      } else {
+        String path = ((JMenuItem) e.getSource()).getText();
+        currFile = new File(path);
+      }
+
       PassFileReader pfr = new PassFileReader(currFile);
 
       do {
@@ -162,6 +171,10 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
       setDocumentModifiedFlag(tbl);
       fillList();
+
+      recentFiles.add(currFile);
+      buildRecentMenu();
+      recentFiles.saveToPreferences();
     }
 
     if (command.equals(SAVE) || command.equals(SAVE_AS)) {
@@ -183,6 +196,10 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
       try {
         pfw.write(tbl, password);
         setDocumentModifiedFlag(tbl);
+
+        recentFiles.add(currFile);
+        buildRecentMenu();
+        recentFiles.saveToPreferences();
       } catch (IOException exc) {
         System.err.println("Error writing: " + exc);
       }
@@ -329,11 +346,16 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     menuItem.addActionListener(this);
     menuItem.setActionCommand(NEW);
     menu.add(menuItem);
-    menuItem = new JMenuItem(OPEN, KeyEvent.VK_O);
-    setAccelerator(menuItem, KeyEvent.VK_O, imAMac);
-    menuItem.addActionListener(this);
-    menuItem.setActionCommand(OPEN);
-    menu.add(menuItem);
+    openMenuItem = new JMenuItem(OPEN, KeyEvent.VK_O);
+    setAccelerator(openMenuItem, KeyEvent.VK_O, imAMac);
+    openMenuItem.addActionListener(this);
+    openMenuItem.setActionCommand(OPEN);
+    menu.add(openMenuItem);
+
+    recentMenu = new JMenu("Open recent");
+    menu.add(recentMenu);
+    buildRecentMenu();
+
     menuItem = new JMenuItem(SAVE, KeyEvent.VK_S);
     setAccelerator(menuItem, KeyEvent.VK_S, imAMac);
     menuItem.addActionListener(this);
@@ -507,6 +529,16 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     // Do a new to initialize.
     ActionEvent e = new ActionEvent(this, -1, NEW);
     actionPerformed(e);
+  }
+
+  private void buildRecentMenu() {
+    recentMenu.removeAll();
+    for (File f : recentFiles) {
+      JMenuItem recentFileItem = new JMenuItem(f.getAbsolutePath());
+      recentFileItem.addActionListener(this);
+      recentFileItem.setActionCommand(OPEN);
+      recentMenu.add(recentFileItem);
+    }
   }
 
   private ImageIcon loadImageIconAsResource(String filename) {
