@@ -11,8 +11,7 @@ import static org.junit.Assert.*;
 
 public class SecureItemTest {
   private static final SecDate NOW = new SecDate();
-  private static final String NOW_STRING =
-    SecureItem.getDateFormat().format(NOW);
+  private static final String NOW_STRING = NOW.toString();
 
   private SecureItem item;
 

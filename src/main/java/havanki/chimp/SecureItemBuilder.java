@@ -18,9 +18,7 @@
  */
 package havanki.chimp;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -110,7 +108,7 @@ public class SecureItemBuilder {
       el_sub = (Element) nl.item(0);
       Date d;
       try {
-          d = SecureItem.getDateFormat().parse(el_sub.getTextContent());
+          d = new SecDate(el_sub.getTextContent());
       } catch (ParseException exc) {
           throw new ChimpException("Unparseable modification time for " +
                                    title);

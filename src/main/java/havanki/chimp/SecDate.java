@@ -18,6 +18,9 @@
  */
 package havanki.chimp;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -25,6 +28,11 @@ import java.util.Date;
  * A date with only second resolution.
  */
 public class SecDate extends Date {
+
+  private static DateFormat getDateFormat() {
+    return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+  }
+
   private static long eliminateMs(long ms) {
     Calendar cal = Calendar.getInstance();
     cal.setTimeInMillis(ms);
@@ -36,11 +44,20 @@ public class SecDate extends Date {
     super(eliminateMs(System.currentTimeMillis()));
   }
 
+  public SecDate(String s) throws ParseException {
+    super(eliminateMs(getDateFormat().parse(s).getTime()));
+  }
+
   public SecDate(long ms) {
     super(eliminateMs(ms));
   }
 
   public SecDate(Date d) {
     super(eliminateMs(d.getTime()));
+  }
+
+  @Override
+  public String toString() {
+    return getDateFormat().format(this);
   }
 }

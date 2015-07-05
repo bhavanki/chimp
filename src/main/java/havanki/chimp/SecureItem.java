@@ -18,9 +18,6 @@
  */
 package havanki.chimp;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -76,8 +73,7 @@ public class SecureItem {
       attachSubElement(el, "username", username, doc);
       attachSubElement(el, "password", new String(password), doc);
       attachSubElement(el, "comments", comments, doc);
-      attachSubElement(el, "modificationDate",
-                       getDateFormat().format(modificationDate), doc);
+      attachSubElement(el, "modificationDate", modificationDate.toString(), doc);
 
       return el;
     } catch (DOMException exc) {
@@ -90,10 +86,6 @@ public class SecureItem {
     Text tx = doc.createTextNode(value);
     el_sub.appendChild(tx);
     el.appendChild(el_sub);
-  }
-
-  static DateFormat getDateFormat() {
-    return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
   }
 
   public void dispose() {
