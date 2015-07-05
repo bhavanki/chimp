@@ -81,16 +81,6 @@ public class SecureItemTable
     return usernames;
   }
 
-  public void fillWithDocument(Document doc) throws ChimpException {
-    NodeList nl = doc.getElementsByTagName("secure-item");
-    for (int i = 0; i < nl.getLength(); i++) {
-      Element el = (Element) nl.item (i);
-      SecureItemBuilder b = new SecureItemBuilder(el);
-      put(b.build());
-    }
-    return;
-  }
-
   public Document getDocument() throws ChimpException {
     Document doc = XmlUtils.newDocument();
 

@@ -93,68 +93,33 @@ public class SecureItemTableTest {
                       usernames);
   }
 
-  private static final String ELEMENTS =
-      "<secure-item-table>" +
-      "  <secure-item title=\"Instagrass\">" +
-      "    <resource>http://www.instagrass.pony/</resource>" +
-      "    <username>Fluttershy</username>" +
-      "    <password>flutterpass</password>" +
-      "    <comments>Yay</comments>" +
-      "    <modificationDate>2013-01-01T12:34:56-0500</modificationDate>" +
-      "  </secure-item>" +
-      "  <secure-item title=\"Ponybook\">" +
-      "    <resource>http://www.book.pony/</resource>" +
-      "    <username>Applejack</username>" +
-      "    <password>password</password>" +
-      "    <comments>Yeehaw</comments>" +
-      "    <modificationDate>2013-01-02T12:34:56-0500</modificationDate>" +
-      "  </secure-item>" +
-      "  <secure-item title=\"Trotter\">" +
-      "    <resource>http://www.trotter.pony/</resource>" +
-      "    <username>Rarity</username>" +
-      "    <password>rarepass</password>" +
-      "    <comments>My word</comments>" +
-      "    <modificationDate>2013-01-03T12:34:56-0500</modificationDate>" +
-      "  </secure-item>" +
-      "</secure-item-table>";
-  private static final Document DOC;
-  static {
-    try {
-      DOC = XmlUtils.parse(ELEMENTS);
-    } catch (ChimpException exc) {
-      throw new ExceptionInInitializerError(exc);
-    }
-  }
-
-  @Test public void testFillWithDocument() throws Exception {
-    t.fillWithDocument(DOC);
-    assertEquals(3, t.size());
-    String[] titles = t.getTitlesInOrder();
-    assertArrayEquals(new String[] { "Instagrass", "Ponybook", "Trotter"},
-                      titles);
-  }
   @Test public void testGetDocument() throws Exception {
-    t.fillWithDocument(DOC);
+    t.put(item1).put(item2).put(item3);
     Document doc = t.getDocument();
-    SecureItemTable t2 = new SecureItemTable();
-    t2.fillWithDocument(doc);
-    String[] titles = t.getTitlesInOrder();
-    assertArrayEquals(new String[] { "Instagrass", "Ponybook", "Trotter"},
-                      titles);
+
+    SecureItemTable t2 = new SecureItemTableFactory().createTable(doc);
+    assertEquals(3, t.size());
+    assertTrue(t.contains(SecureItemTableTest.item1));
+    assertTrue(t.contains(SecureItemTableTest.item2));
+    assertTrue(t.contains(SecureItemTableTest.item3));
   }
 
   @Test public void testEquals() {
     t.put(item1).put(item2);
     assertTrue(t.equals(t));
     assertFalse(t.equals(null));
+
     SecureItemTable t2 = new SecureItemTable();
     t2.put(item1).put(item2);
     assertTrue(t.equals(t2));
     assertTrue(t2.equals(t));
+
     t2.put(item3);
     assertFalse(t.equals(t2));
+
     t2.remove(item3.getTitle()).remove(item1.getTitle());
     assertFalse(t.equals(t2));
+
     t2.put(item1);
     assertTrue(t.equals(t2));
   }

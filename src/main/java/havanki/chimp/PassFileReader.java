@@ -89,14 +89,12 @@ public class PassFileReader
     if (in != null) in.close();
     is.close();
 
-    SecureItemTable tbl = new SecureItemTable();
     try {
-      tbl.fillWithDocument(doc);
+      return new SecureItemTableFactory().createTable(doc);
     } catch (ChimpException exc) {
       IOException ioe = new IOException("Unable to understand document");
       ioe.initCause(exc);
       throw ioe;
     }
-    return tbl;
   }
 }
