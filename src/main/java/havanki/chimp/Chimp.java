@@ -18,11 +18,16 @@
  */
 package havanki.chimp;
 
+import com.apple.eawt.AboutHandler;
+import com.apple.eawt.Application;
+import com.apple.eawt.AppEvent.AboutEvent;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.datatransfer.*;
 import javax.swing.*;
 import java.io.*;
+
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -61,6 +66,17 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     return;
   }
 
+  private static final String ABOUT_HTML =
+      "<html>" +
+      "<div class='text-align: center'>" +
+      "<h2>CHIMP</h2>" +
+      "Because everything is better with monkeys.<br><br>" +
+      "Copyright (c) 2001-2015 Bill Havanki<br><br>" +
+      "Use of CHIMP is subject to the GNU General Public License Version 2.<br>" +
+      "See gpl.txt or visit <a href='http://www.gnu.org/'>www.gnu.org</a> to view it." +
+      "</div>" +
+      "</html>";
+
   public void actionPerformed(ActionEvent e) {
     this.repaint();
     String command = e.getActionCommand();
@@ -69,8 +85,9 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
       System.exit(0);
 
     if (command.equals(ABOUT)) {
-      JOptionPane.showMessageDialog(this, loadImageIconAsResource("about.gif"),
-                                    "About CHIMP", JOptionPane.PLAIN_MESSAGE);
+      JOptionPane.showMessageDialog(this, ABOUT_HTML,
+                                    "About CHIMP", JOptionPane.PLAIN_MESSAGE,
+                                    loadImageIconAsResource("face-monkey.png"));
       return;
     }
     if (command.equals(HP_MODE)) {
@@ -359,10 +376,21 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     menu.setMnemonic(KeyEvent.VK_H);
     menuBar.add(menu);
 
-    menuItem = new JMenuItem(ABOUT, KeyEvent.VK_A);
-    menuItem.addActionListener(this);
-    menuItem.setActionCommand(ABOUT);
-    menu.add(menuItem);
+    if (imAMac) {
+      Application macApplication = Application.getApplication();
+      macApplication.setAboutHandler(new AboutHandler() {
+        @Override
+        public void handleAbout(AboutEvent aboutEvent) {
+          ActionEvent e = new ActionEvent(Chimp.this, -1, ABOUT);
+          actionPerformed(e);
+        }
+      });
+    } else {
+      menuItem = new JMenuItem(ABOUT, KeyEvent.VK_A);
+      menuItem.addActionListener(this);
+      menuItem.setActionCommand(ABOUT);
+      menu.add(menuItem);
+    }
 
     // TOOLBAR
     JToolBar toolbar = new JToolBar();
