@@ -39,6 +39,8 @@ open it with the password "sample".
 CHIMP is licensed under the
 [GNU General Public License, version 2](http://opensource.org/licenses/gpl-2.0.php).
 
+See LICENSE.md for license information for components used in CHIMP.
+
 ### Extra Legal Disclaimer
 
 Articles 11 and 12 of GPL v2 apply to CHIMP. In plain English: There is no

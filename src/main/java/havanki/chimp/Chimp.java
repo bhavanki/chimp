@@ -231,6 +231,29 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
   public Chimp() {
     super("CHIMP!");
 
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+
+    Font openSansRegular;
+    InputStream in = Chimp.class.getResourceAsStream("/OpenSans-Regular.ttf");
+    if (in == null) {
+      throw new IllegalStateException("Cannot find Open Sans font");
+    }
+    try {
+      openSansRegular = Font.createFont(Font.TRUETYPE_FONT, in);
+      GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      ge.registerFont(openSansRegular);
+    } catch (IOException e) {
+      openSansRegular = null;
+    } catch (FontFormatException e) {
+      openSansRegular = null;
+    } finally {
+      try { in.close(); } catch (IOException e) {}
+    }
+
     setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
@@ -245,6 +268,9 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     String osString = System.getProperty("os.name");
     boolean imAMac =
         osString.toLowerCase(java.util.Locale.US).indexOf("mac") != -1;
+    if (imAMac) {
+      System.setProperty("apple.laf.useScreenMenuBar", "true");
+    }
 
     // MENU
     JMenuBar menuBar = new JMenuBar();
@@ -340,17 +366,17 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
     // TOOLBAR
     JToolBar toolbar = new JToolBar();
-    JButton tbButton = new JButton(loadImageIconAsResource("New16.gif"));
+    JButton tbButton = new JButton(loadImageIconAsResource("new.png"));
     tbButton.addActionListener(this);
     tbButton.setActionCommand(NEW);
     tbButton.setToolTipText("New File");
     toolbar.add(tbButton);
-    tbButton = new JButton(loadImageIconAsResource("Open16.gif"));
+    tbButton = new JButton(loadImageIconAsResource("table_go.png"));
     tbButton.addActionListener(this);
     tbButton.setActionCommand(OPEN);
     tbButton.setToolTipText("Open File");
     toolbar.add(tbButton);
-    tbButton = new JButton(loadImageIconAsResource("Save16.gif"));
+    tbButton = new JButton(loadImageIconAsResource("table_save.png"));
     tbButton.addActionListener(this);
     tbButton.setActionCommand(SAVE);
     tbButton.setToolTipText("Save File");
@@ -358,22 +384,22 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
     toolbar.addSeparator();
 
-    tbButton = new JButton(loadImageIconAsResource("Add16.gif"));
+    tbButton = new JButton(loadImageIconAsResource("add.png"));
     tbButton.addActionListener(this);
     tbButton.setActionCommand(ADD);
     tbButton.setToolTipText("Add Item");
     toolbar.add(tbButton);
-    tbButton = new JButton(loadImageIconAsResource("Delete16.gif"));
+    tbButton = new JButton(loadImageIconAsResource("delete.png"));
     tbButton.addActionListener(this);
     tbButton.setActionCommand(REMOVE);
     tbButton.setToolTipText("Remove Item");
     toolbar.add(tbButton);
-    tbButton = new JButton(loadImageIconAsResource("Copy16.gif"));
+    tbButton = new JButton(loadImageIconAsResource("page_copy.png"));
     tbButton.addActionListener(this);
     tbButton.setActionCommand(COPY);
     tbButton.setToolTipText("Copy to Clipboard");
     toolbar.add(tbButton);
-    tbButton = new JButton(loadImageIconAsResource("Remove16.gif"));
+    tbButton = new JButton(loadImageIconAsResource("cross.png"));
     tbButton.addActionListener(this);
     tbButton.setActionCommand(CLEAR);
     tbButton.setToolTipText("Clear Clipboard");
@@ -399,6 +425,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     };
     itemList.setVisibleRowCount(25);
     itemList.addMouseListener(this);
+    itemList.setFont(openSansRegular.deriveFont(16.0f));
     ToolTipManager.sharedInstance().registerComponent(itemList);
     JScrollPane scrollPane = new JScrollPane(itemList);
     scrollPane.setBorder(BorderFactory.createCompoundBorder(

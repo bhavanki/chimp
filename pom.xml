@@ -26,6 +26,8 @@
         <directory>src/main/resources</directory>
         <includes>
           <include>*.gif</include>
+          <include>*.png</include>
+          <include>*.ttf</include>
         </includes>
       </resource>
     </resources>
@@ -72,10 +74,12 @@
                   outputdirectory="${project.build.directory}"
                   name="Chimp" displayName="Chimp"
                   identifier="havanki.chimp.Chimp"
+                  icon="${project.basedir}/src/main/resources/face-monkey.icns"
                   shortversion="${project.version}"
                   mainclassname="havanki.chimp.Chimp">
                   <runtime dir="${env.JAVA_HOME}" />
                   <classpath file="${project.build.directory}/${project.build.finalName}.jar" />
+                  <option value="-Xdock:name=CHIMP" />
                   <option value="-Dapple.laf.useScreenMenuBar=true" />
                   <option value="-Dapple.awt.textantialiasing=true" />
                 </bundleapp>
