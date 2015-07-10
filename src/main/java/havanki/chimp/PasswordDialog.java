@@ -43,6 +43,16 @@ public class PasswordDialog extends JDialog implements ActionListener
     Arrays.fill(a, (char) 0);
   }
 
+  private class OkAction extends AbstractAction {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      PasswordDialog.this.actionPerformed(
+          new ActionEvent(e.getSource(), ActionEvent.ACTION_FIRST, OK));
+    }
+  }
+  private OkAction okAction = new OkAction();
+
+  @Override
   public void actionPerformed (ActionEvent e) {
     String command = e.getActionCommand();
 
@@ -118,9 +128,17 @@ public class PasswordDialog extends JDialog implements ActionListener
     else
       fieldPanel.setLayout(new GridLayout(1, 0));
     pwdField = new JPasswordField();
+    if (!verify) {
+      pwdField.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+                                 "doOK");
+      pwdField.getActionMap().put("doOK", okAction);
+    }
     fieldPanel.add(pwdField);
     if (verify) {
       verField = new JPasswordField();
+      verField.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+                                 "doOK");
+      verField.getActionMap().put("doOK", okAction);
       fieldPanel.add(verField);
     }
 
