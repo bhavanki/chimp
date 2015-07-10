@@ -54,6 +54,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
   RecentFileList recentFiles = RecentFileList.loadFromPreferences();
   JMenuItem openMenuItem;
+  JButton openButton;
   JMenu recentMenu;
   File currFile = null;
   SecureItemTable tbl = null;
@@ -135,7 +136,8 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
       this.repaint();
 
-      if (e.getSource().equals(openMenuItem)) {
+      if (e.getSource().equals(openMenuItem) ||
+          e.getSource().equals(openButton)) {
         FileDialog fdialog =
             new FileDialog(this, "Open a password file", FileDialog.LOAD);
         fdialog.show();
@@ -460,11 +462,11 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     tbButton.setActionCommand(NEW);
     tbButton.setToolTipText("New File");
     toolbar.add(tbButton);
-    tbButton = new JButton(loadImageIconAsResource("table_go.png"));
-    tbButton.addActionListener(this);
-    tbButton.setActionCommand(OPEN);
-    tbButton.setToolTipText("Open File");
-    toolbar.add(tbButton);
+    openButton = new JButton(loadImageIconAsResource("table_go.png"));
+    openButton.addActionListener(this);
+    openButton.setActionCommand(OPEN);
+    openButton.setToolTipText("Open File");
+    toolbar.add(openButton);
     tbButton = new JButton(loadImageIconAsResource("table_save.png"));
     tbButton.addActionListener(this);
     tbButton.setActionCommand(SAVE);
