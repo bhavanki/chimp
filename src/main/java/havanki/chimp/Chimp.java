@@ -91,7 +91,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener {
   JButton openButton;
   JMenu recentMenu;
   JCheckBoxMenuItem hpmodeItem;
-  JList itemList;
+  JList<String> itemList;
 
   File currFile = null;
   SecureItemTable tbl = null;
@@ -208,6 +208,8 @@ public class Chimp extends JFrame implements ActionListener, MouseListener {
 
       setDocumentModifiedFlag(tbl);
       fillList();
+      itemList.setSelectedIndex(0);
+      itemList.requestFocusInWindow();
 
       recentFiles.add(currFile);
       buildRecentMenu();
@@ -241,6 +243,8 @@ public class Chimp extends JFrame implements ActionListener, MouseListener {
         LOG.severe("Error writing: " + exc);
       }
       PasswordDialog.cleanCharArray (password);
+
+      itemList.requestFocusInWindow();
     }
 
     // - - - - -
@@ -263,11 +267,24 @@ public class Chimp extends JFrame implements ActionListener, MouseListener {
                                          hidePasswords);
       setDocumentModifiedFlag(tbl);
       fillList();
+
+      ListModel<String> itemListModel = itemList.getModel();
+      int size = itemListModel.getSize();
+      for (int i = 0; i < size; i++) {
+        if (itemListModel.getElementAt(i).equals(editDialog.selectedTitle)) {
+          itemList.setSelectedIndex(i);
+          itemList.ensureIndexIsVisible(i);
+          break;
+        }
+      }
+
+      itemList.requestFocusInWindow();
     }
 
     if (command.equals(REMOVE)) {
       String selectedTitle = (String) itemList.getSelectedValue();
       if (selectedTitle == null) return;
+      int selectedIndex = itemList.getSelectedIndex();
 
       int rc = JOptionPane.showConfirmDialog(this,
           "Are you sure you want to delete \"" + selectedTitle + "\"?",
@@ -278,12 +295,14 @@ public class Chimp extends JFrame implements ActionListener, MouseListener {
       setDocumentModifiedFlag(tbl);
 
       fillList();
+      itemList.setSelectedIndex(selectedIndex > 0 ? selectedIndex - 1 : 0);
+      itemList.requestFocusInWindow();
     }
 
     // - - - - -
 
     if (command.equals(COPY)) {
-      String selectedTitle = (String) itemList.getSelectedValue();
+      String selectedTitle = itemList.getSelectedValue();
       if (selectedTitle == null) return;
 
       Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -324,6 +343,16 @@ public class Chimp extends JFrame implements ActionListener, MouseListener {
   public void mouseReleased(MouseEvent e) {}
   public void mouseEntered(MouseEvent e) {}
   public void mouseExited(MouseEvent e) {}
+
+  private class OpenSelectedListItemAction extends AbstractAction {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      Chimp.this.actionPerformed(
+          new ActionEvent(e.getSource(), ActionEvent.ACTION_FIRST, MODIFY));
+    }
+  }
+  private OpenSelectedListItemAction openSelectedListItemAction =
+      new OpenSelectedListItemAction();
 
   public Chimp() {
     super("CHIMP!");
@@ -517,7 +546,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener {
     // FRAME CONTENTS
     mainPanel.add(toolbar, BorderLayout.NORTH);
 
-    itemList = new JList() {
+    itemList = new JList<String>() {
       public String getToolTipText(MouseEvent e) {
         Point p = e.getPoint();
         int idx = locationToIndex(p);
@@ -534,6 +563,16 @@ public class Chimp extends JFrame implements ActionListener, MouseListener {
     };
     itemList.setVisibleRowCount(25);
     itemList.addMouseListener(this);
+    itemList.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+                               "openSelectedListItem");
+    itemList.getActionMap().put("openSelectedListItem",
+                                openSelectedListItemAction);
+    itemList.setTransferHandler(new TransferHandler("disabled") {
+      @Override
+      public int getSourceActions(JComponent c) {
+        return TransferHandler.NONE;
+      }
+    });
     if (OPEN_SANS_REGULAR != null) {
       itemList.setFont(OPEN_SANS_REGULAR_16);
     }
