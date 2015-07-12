@@ -18,6 +18,9 @@
  */
 package havanki.chimp;
 
+import static havanki.chimp.Chimp.OPEN_SANS_REGULAR;
+import static havanki.chimp.Chimp.OPEN_SANS_REGULAR_16;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -128,39 +131,33 @@ public class ItemEdit extends JDialog implements ActionListener
     // Left center = labels
     JPanel labelPanel = new JPanel();
     labelPanel.setLayout(new GridLayout(5, 0));
-    JLabel l = new JLabel("Title"); labelPanel.add(l);
-    l = new JLabel("Resource"); labelPanel.add(l);
-    l = new JLabel("Username"); labelPanel.add(l);
-    l = new JLabel("Password"); labelPanel.add(l);
-    l = new JLabel("Comments"); labelPanel.add(l);
+    addLabel("Title", labelPanel);
+    addLabel("Resource", labelPanel);
+    addLabel("Username", labelPanel);
+    addLabel("Password", labelPanel);
+    addLabel("Comments", labelPanel);
     entryPanel.add(labelPanel, BorderLayout.WEST);
 
     // Right center = fields
     JPanel fieldPanel = new JPanel();
     fieldPanel.setLayout(new GridLayout(5, 0));
-    titleField = new JTextField(item.getTitle());
-    fieldPanel.add(titleField);
-    resourceField = new JTextField(item.getResource());
-    fieldPanel.add(resourceField);
-    usernameField = new JTextField(item.getUsername());
-    fieldPanel.add(usernameField);
+    titleField = addTextField(item.getTitle(), false, fieldPanel);
+    resourceField = addTextField(item.getResource(), false, fieldPanel);
+    usernameField = addTextField(item.getUsername(), false, fieldPanel);
     char[] itemPasswordChars = item.getPassword();
     String itemPassword = "";
     if (itemPasswordChars != null) {
       itemPassword = new String(itemPasswordChars);
     }
     if (hidePassword) {
-      passwordField = new JPasswordField(itemPassword);
-      fieldPanel.add(passwordField);
+      passwordField = (JPasswordField) addTextField(itemPassword, true, fieldPanel);
     } else {
-      clearPasswordField = new JTextField(itemPassword);
-      fieldPanel.add(clearPasswordField);
+      clearPasswordField = addTextField(itemPassword, false, fieldPanel);
     }
 
     //    commentsArea = new JTextArea(item.getComments(), 4, 25);
     //    JScrollPane commentsScroll = new JScrollPane(commentsArea);
-    commentsField = new JTextField(item.getComments());
-    fieldPanel.add(commentsField);
+    commentsField = addTextField(item.getComments(), false, fieldPanel);
 
     entryPanel.add(fieldPanel);
 
@@ -189,5 +186,29 @@ public class ItemEdit extends JDialog implements ActionListener
     pack();
     setLocationRelativeTo(owner);
     setVisible(true);
+  }
+
+  private void addLabel(String title, JPanel panel) {
+    JLabel l = new JLabel(title);
+    if (Chimp.OPEN_SANS_REGULAR != null) {
+      l.setFont(OPEN_SANS_REGULAR_16);
+    }
+    panel.add(l);
+  }
+
+  private JTextField addTextField(String initialText, boolean isPassword,
+                                  JPanel panel) {
+    JTextField f;
+    if (isPassword) {
+      f = new JPasswordField(initialText);
+      ((JPasswordField) f).setEchoChar('*');
+    } else {
+      f = new JTextField(initialText);
+    }
+    if (Chimp.OPEN_SANS_REGULAR != null) {
+      f.setFont(OPEN_SANS_REGULAR_16);
+    }
+    panel.add(f);
+    return f;
   }
 }

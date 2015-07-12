@@ -30,12 +30,15 @@ import java.awt.event.*;
 import java.awt.datatransfer.*;
 import javax.swing.*;
 import java.io.*;
+import java.util.logging.Logger;
 
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
-public class Chimp extends JFrame implements ActionListener, MouseListener
-{
+public class Chimp extends JFrame implements ActionListener, MouseListener {
+
+  private static final Logger LOG = Logger.getLogger(Chimp.class.getName());
+
   private static final String NEW = "New";
   private static final String OPEN = "Open...";
   private static final String SAVE = "Save";
@@ -52,14 +55,46 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
 
   private static final String ABOUT = "About";
 
+  static final Font OPEN_SANS_REGULAR;
+  static final Font OPEN_SANS_REGULAR_16;
+
+  static {
+    InputStream in = Chimp.class.getResourceAsStream("/OpenSans-Regular.ttf");
+    if (in == null) {
+      LOG.warning("Cannot find Open Sans font");
+      OPEN_SANS_REGULAR = null;
+    } else {
+      Font openSansRegular = null;
+      try {
+        openSansRegular = Font.createFont(Font.TRUETYPE_FONT, in);
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        ge.registerFont(openSansRegular);
+      } catch (IOException|FontFormatException e) {
+        LOG.warning("Failed to load Open Sans font: " + e.getMessage());
+        openSansRegular = null;
+      } finally {
+        try { in.close(); } catch (IOException e) {}
+      }
+
+      OPEN_SANS_REGULAR = openSansRegular;
+    }
+
+    if (OPEN_SANS_REGULAR != null) {
+      OPEN_SANS_REGULAR_16 = OPEN_SANS_REGULAR.deriveFont(16.0f);
+    } else {
+      OPEN_SANS_REGULAR_16 = null;
+    }
+  }
+
   RecentFileList recentFiles = RecentFileList.loadFromPreferences();
   JMenuItem openMenuItem;
   JButton openButton;
   JMenu recentMenu;
+  JCheckBoxMenuItem hpmodeItem;
+  JList itemList;
+
   File currFile = null;
   SecureItemTable tbl = null;
-  JList itemList;
-  JCheckBoxMenuItem hpmodeItem;
   boolean hidePasswords = true;
 
   private void fillList() {
@@ -166,7 +201,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
                 "Parsing Error", JOptionPane.ERROR_MESSAGE);
           }
         } catch (IOException exc) {
-          System.err.println("Error reading: " + exc);
+          LOG.severe("Error reading: " + exc);
           exc.printStackTrace(System.err);
         }
       } while (tbl == null);
@@ -203,7 +238,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
         buildRecentMenu();
         recentFiles.saveToPreferences();
       } catch (IOException exc) {
-        System.err.println("Error writing: " + exc);
+        LOG.severe("Error writing: " + exc);
       }
       PasswordDialog.cleanCharArray (password);
     }
@@ -297,23 +332,6 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {
       throw new IllegalStateException(e);
-    }
-
-    Font openSansRegular;
-    InputStream in = Chimp.class.getResourceAsStream("/OpenSans-Regular.ttf");
-    if (in == null) {
-      throw new IllegalStateException("Cannot find Open Sans font");
-    }
-    try {
-      openSansRegular = Font.createFont(Font.TRUETYPE_FONT, in);
-      GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-      ge.registerFont(openSansRegular);
-    } catch (IOException e) {
-      openSansRegular = null;
-    } catch (FontFormatException e) {
-      openSansRegular = null;
-    } finally {
-      try { in.close(); } catch (IOException e) {}
     }
 
     setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -516,7 +534,9 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
     };
     itemList.setVisibleRowCount(25);
     itemList.addMouseListener(this);
-    itemList.setFont(openSansRegular.deriveFont(16.0f));
+    if (OPEN_SANS_REGULAR != null) {
+      itemList.setFont(OPEN_SANS_REGULAR_16);
+    }
     ToolTipManager.sharedInstance().registerComponent(itemList);
     JScrollPane scrollPane = new JScrollPane(itemList);
     scrollPane.setBorder(BorderFactory.createCompoundBorder(
@@ -548,7 +568,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
       InputStream in =
         ClassLoader.getSystemClassLoader().getResourceAsStream(filename);
       if (in == null) {
-        System.err.println("Could not open " + filename);
+        LOG.severe("Could not open " + filename);
         return null;
       }
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -561,8 +581,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener
       baos.close();
       return icon;
     } catch (IOException exc) {
-      System.err.println("Could not get image " + filename + ": " +
-                         exc.getMessage());
+      LOG.severe("Could not get image " + filename + ": " + exc.getMessage());
       return null;
     }
   }
