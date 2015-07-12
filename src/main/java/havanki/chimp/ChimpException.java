@@ -1,5 +1,5 @@
 /*
- * CHIMP 1.1.1 - Cyber Helper Internet Monkey Program
+ * CHIMP 1.2.0 - Cyber Helper Internet Monkey Program
  * Copyright (C) 2001-2015 Bill Havanki
  *
  * This program is free software; you can redistribute it and/or

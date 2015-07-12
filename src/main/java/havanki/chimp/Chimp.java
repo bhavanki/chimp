@@ -1,5 +1,5 @@
 /*
- * CHIMP 1.1.1 - Cyber Helper Internet Monkey Program
+ * CHIMP 1.2.0 - Cyber Helper Internet Monkey Program
  * Copyright (C) 2001-2015 Bill Havanki
  *
  * This program is free software; you can redistribute it and/or
@@ -601,7 +601,7 @@ public class Chimp extends JFrame implements ActionListener, MouseListener {
   }
 
   public static void main(String args[]) {
-    System.out.println ("CHIMP 1.1, Copyright (C) 2001-2015 Bill Havanki");
+    System.out.println ("CHIMP 1.2, Copyright (C) 2001-2015 Bill Havanki");
     System.out.println ("CHIMP comes with ABSOLUTELY NO WARRANTY. This is free software, and you are");
     System.out.println ("welcome to redistribute it under certain conditions. For details, see");
     System.out.println ("Help, About.");
