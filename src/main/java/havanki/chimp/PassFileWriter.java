@@ -20,27 +20,26 @@ package havanki.chimp;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import javax.crypto.*;
-import javax.crypto.spec.*;
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
 
 /**
  * A writer for password files.
  */
 public class PassFileWriter
 {
-  private static final byte[] salt = {
+  static final byte[] salt = {
       (byte)0x49, (byte)0x52, (byte)0x42, (byte)0x41,
       (byte)0x42, (byte)0x00, (byte)0x00, (byte)0x4e
   };
-  private static final int iterationCount = 20;
-  static final PBEParameterSpec pbeSpec =
-      new PBEParameterSpec(salt, iterationCount);
+  static final int iterationCount = 20;
 
   private final File file;
 
@@ -49,52 +48,43 @@ public class PassFileWriter
   }
 
   public void write(SecureItemTable tbl, char[] password) throws IOException {
-    OutputStream os = new FileOutputStream(file);
-    OutputStream xmlout;
+    try (OutputStream os = new FileOutputStream(file)) {
+      OutputStream xmlout;
 
-    if (password.length == 0) {
-      xmlout = os;
-      os = null;
-    } else {
-      PBEKeySpec keyspec = new PBEKeySpec(password);
-      Cipher c;
-      try {
-        SecretKeyFactory fac = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
-        SecretKey key = fac.generateSecret(keyspec);
+      if (password.length == 0) {
+        xmlout = os;
+      } else {
+        Cipher c;
+        try {
+          c = new PassFileCipher("PBEWithMD5AndDES", iterationCount, salt)
+              .getCipher(Cipher.ENCRYPT_MODE, password);
+        } catch (GeneralSecurityException exc) {
+          throw new IOException("Security exception during write", exc);
+        }
 
-        c = Cipher.getInstance("PBEWithMD5AndDES");
-        c.init(Cipher.ENCRYPT_MODE, key, pbeSpec);
-      } catch (java.security.GeneralSecurityException exc) {
-        os.close();
-        IOException ioe = new IOException("Security exception during write");
-        ioe.initCause(exc);
-        throw ioe;
+        xmlout = new CipherOutputStream(os, c);
       }
 
-      CipherOutputStream out = new CipherOutputStream(os, c);
-      xmlout = out;
-    }
+      try {
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer t = tf.newTransformer();
 
-    try {
-      TransformerFactory tf = TransformerFactory.newInstance();
-      Transformer t = tf.newTransformer();
+        DOMSource src = new DOMSource(tbl.getDocument());
+        StringWriter writer = new StringWriter();
+        StreamResult sr = new StreamResult(writer);
+        t.transform(src, sr);
 
-      DOMSource src = new DOMSource(tbl.getDocument());
-      StringWriter writer = new StringWriter();
-      StreamResult sr = new StreamResult(writer);
-      t.transform(src, sr);
-
-      OutputStreamWriter osw =
-        new OutputStreamWriter(xmlout, StandardCharsets.UTF_8);
-      osw.write(writer.toString());
-      osw.close();
-    } catch (Exception exc) {
-      IOException ioe = new IOException("Unable to serialize XML");
-      ioe.initCause(exc);
-      throw ioe;
-    } finally {
-      xmlout.close();
-      if (os != null) os.close();
+        try (OutputStreamWriter osw =
+             new OutputStreamWriter(xmlout, StandardCharsets.UTF_8)) {
+          osw.write(writer.toString());
+        }
+      } catch (Exception exc) {
+        throw new IOException("Unable to serialize XML", exc);
+      } finally {
+        if (xmlout != os) {
+          xmlout.close();
+        }
+      }
     }
 
     tbl.setDirty(false);

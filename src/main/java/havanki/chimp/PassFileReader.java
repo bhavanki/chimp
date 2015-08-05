@@ -19,12 +19,13 @@
 package havanki.chimp;
 
 import java.io.*;
+import java.security.GeneralSecurityException;
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
-import javax.crypto.*;
-import javax.crypto.spec.*;
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 
 /**
  * A reader for password files.
@@ -38,63 +39,57 @@ public class PassFileReader
   }
 
   public SecureItemTable read(char[] password) throws IOException {
-    InputStream is = new FileInputStream(file);
-    CipherInputStream in;
-    InputSource source;
+    Document doc;
 
-    if (password.length == 0) {
-      in = null;
-      source = new InputSource(is);
-    } else {
-      PBEKeySpec keyspec = new PBEKeySpec(password);
-      Cipher c;
-      try {
-        SecretKeyFactory fac =
-        SecretKeyFactory.getInstance("PBEWithMD5AndDES");
-        SecretKey key = fac.generateSecret(keyspec);
+    try (InputStream is = new FileInputStream(file)) {
+      CipherInputStream in;
+      InputSource source;
 
-        c = Cipher.getInstance("PBEWithMD5AndDES");
-        c.init(Cipher.DECRYPT_MODE, key, PassFileWriter.pbeSpec);
-      } catch (java.security.GeneralSecurityException exc) {
-        is.close();
-        IOException ioe = new IOException("Security exception during read");
-        ioe.initCause(exc);
-        throw ioe;
+      if (password.length == 0) {
+        in = null;
+        source = new InputSource(is);
+      } else {
+        Cipher c;
+        try {
+          c = new PassFileCipher("PBEWithMD5AndDES",
+                                 PassFileWriter.iterationCount,
+                                 PassFileWriter.salt)
+              .getCipher(Cipher.DECRYPT_MODE, password);
+        } catch (GeneralSecurityException exc) {
+          throw new IOException("Security exception during read", exc);
+        }
+
+        in = new CipherInputStream(is, c);
+        source = new InputSource(in);
       }
 
-      in = new CipherInputStream(is, c);
-      source = new InputSource(in);
-    }
+      try {
+        DocumentBuilder db = null;
+        try {
+          DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+          db = dbf.newDocumentBuilder();
+        } catch (ParserConfigurationException exc) {
+          throw new IOException("Could not create document builder", exc);
+        }
 
-    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    DocumentBuilder db = null;
-    try {
-      db = dbf.newDocumentBuilder();
-    } catch (ParserConfigurationException exc) {
-      IOException ioe = new IOException("Could not create document builder");
-      ioe.initCause(exc);
-      throw ioe;
+        try {
+          doc = db.parse(source);
+        } catch (IOException exc) {
+          // Probably the wrong password...
+          return null;
+        } catch (SAXException exc) {
+          // Probably the wrong password...
+          return null;
+        }
+      } finally {
+        if (in != null) in.close();
+      }
     }
-    Document doc;
-    try {
-      doc = db.parse(source);
-    } catch (IOException exc) {
-      // Probably the wrong password...
-      return null;
-    } catch (SAXException exc) {
-      // Probably the wrong password...
-      return null;
-    }
-
-    if (in != null) in.close();
-    is.close();
 
     try {
       return new SecureItemTableFactory().createTable(doc);
     } catch (ChimpException exc) {
-      IOException ioe = new IOException("Unable to understand document");
-      ioe.initCause(exc);
-      throw ioe;
+      throw new IOException("Unable to understand document", exc);
     }
   }
 }
